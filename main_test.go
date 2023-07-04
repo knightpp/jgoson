@@ -47,4 +47,13 @@ func TestRecursion(t *testing.T) {
 		assert.Equal(t, "[]int", finalField.Type.Name)
 		assert.Len(t, finalField.Type.Fields, 0)
 	})
+
+	t.Run("slice", func(t *testing.T) {
+		res := recursion([]any{"string"})
+
+		assert.Equal(t, "Generated", res.Name)
+		assert.Len(t, res.Fields, 1)
+		assert.Equal(t, "Generated", res.Fields[0].Name)
+		assert.Equal(t, "string", res.Fields[0].Type.Name)
+	})
 }

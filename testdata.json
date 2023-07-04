@@ -1,9 +1,5 @@
 {
-    "data": "Click Here",
-    "categories": {
-        "category_1": "1",
-        "array": [
-            "a"
-        ]
-    }
+    "tags": [
+        "amet"
+    ]
 }

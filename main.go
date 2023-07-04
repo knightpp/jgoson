@@ -1,7 +1,14 @@
 package main
 
 import (
+	"bytes"
 	_ "embed"
+	"encoding/json"
+	"fmt"
+	"go/format"
+	"io"
+	"log"
+	"os"
 	"reflect"
 )
 
@@ -9,15 +16,28 @@ import (
 var testData []byte
 
 func main() {
-	// var v any
-	// err := json.Unmarshal(testData, &v)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	var v any
+	err := json.Unmarshal(testData, &v)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// structs := recursion(v, nil, 1)
+	t := recursion(v)
 
-	// fmt.Printf("%+#v\n", structs)
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetIndent("", "  ")
+	enc.Encode(t)
+
+	buf := bytes.Buffer{}
+	t.ToGoInline(&buf)
+
+	src, err := format.Source(buf.Bytes())
+	if err != nil {
+		fmt.Println(buf.String())
+		log.Fatal(err)
+	}
+
+	fmt.Println(string(src))
 
 	// buf := bytes.Buffer{}
 	// printStruct(&buf, Type{
@@ -34,29 +54,6 @@ func main() {
 	// fmt.Println(string(src))
 }
 
-// func printStruct(w io.Writer, t Type) {
-// 	fmt.Fprintln(w, "type", t.Name, "struct {")
-// 	printFields(w, t.Types)
-// 	fmt.Fprintln(w, "}")
-// }
-
-// func printFields(w io.Writer, fields []Type) {
-// 	for _, field := range fields {
-// 		if len(field.Types) == 0 {
-// 			fmt.Fprintf(w, "%s %s `%s`\n", field.Name, field.Type, field.Annotation)
-// 			continue
-// 		}
-
-// 		fmt.Fprintf(w, "%s %s `%s`", field.Name, "GeneratedType", field.Annotation)
-
-// 		field := field
-// 		printStruct(w, Type{
-// 			Name:  "GeneratedType",
-// 			Types: field.Types,
-// 		})
-// 	}
-// }
-
 type Type struct {
 	Name   string
 	Fields []Field
@@ -65,6 +62,43 @@ type Type struct {
 type Field struct {
 	Name string
 	Type *Type
+}
+
+func (t *Type) IsStruct() bool {
+	return len(t.Fields) != 0
+}
+
+func (t *Type) ToGoInline(w io.Writer) {
+	fmt.Fprintln(w, "type", t.Name, "struct {")
+	for _, field := range t.Fields {
+		field.toGoInline(w)
+	}
+	fmt.Fprintln(w, "}")
+}
+
+func (t *Type) toGoInline(w io.Writer) {
+	if !t.IsStruct() {
+		fmt.Fprint(w, t.Name)
+		return
+	}
+
+	for _, field := range t.Fields {
+		field.toGoInline(w)
+		fmt.Fprintln(w)
+	}
+}
+
+func (t Field) toGoInline(w io.Writer) {
+	fmt.Fprint(w, t.Name, " ")
+
+	if t.Type.IsStruct() {
+		fmt.Fprintln(w, "struct{")
+		t.Type.toGoInline(w)
+		fmt.Fprintln(w, "}")
+		return
+	}
+
+	t.Type.toGoInline(w)
 }
 
 func recursion(value any) *Type {
@@ -87,10 +121,12 @@ func recursionInner(value any, parentName string, depth int) *Type {
 		return t
 	} else if s, ok := value.([]any); ok {
 		if len(s) > 0 {
+			t := recursionInner(s[0], parentName, depth+1)
 			t.Fields = append(t.Fields, Field{
 				Name: parentName,
-				Type: recursionInner(s[0], parentName, depth+1),
+				Type: t,
 			})
+			return t
 		}
 		return t
 	} else {
