@@ -1,6 +1,9 @@
 {
     "data": "Click Here",
     "categories": {
-        "category_1": "1"
+        "category_1": "1",
+        "array": [
+            "a"
+        ]
     }
 }
