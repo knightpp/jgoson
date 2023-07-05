@@ -1,5 +1,45 @@
 {
+    "_id": "64a5af0bd063a61b218aee85",
+    "index": 0,
+    "guid": "adbbd025-4f2e-40bd-98e5-0191598e26f7",
+    "isActive": false,
+    "balance": "$3,976.54",
+    "picture": "http://placehold.it/32x32",
+    "age": 33,
+    "eyeColor": "blue",
+    "name": "Bentley Underwood",
+    "gender": "male",
+    "company": "KANGLE",
+    "email": "bentleyunderwood@kangle.com",
+    "phone": "+1 (951) 413-3296",
+    "address": "200 Polhemus Place, Staples, Delaware, 3132",
+    "about": "Esse sit exercitation ex enim dolor et eu id ullamco aute consectetur adipisicing dolore. Velit irure do elit veniam consectetur veniam in. Nisi tempor ut incididunt nulla sit pariatur velit labore nisi incididunt labore duis fugiat id.\r\n",
+    "registered": "2019-01-23T03:39:33 -02:00",
+    "latitude": 20.236903,
+    "longitude": 4.215941,
     "tags": [
-        "amet"
-    ]
+        "sint",
+        "mollit",
+        "cillum",
+        "elit",
+        "aute",
+        "ea",
+        "laboris"
+    ],
+    "friends": [
+        {
+            "id": 0,
+            "name": "Deloris Melton"
+        },
+        {
+            "id": 1,
+            "name": "Erna Burt"
+        },
+        {
+            "id": 2,
+            "name": "Jacklyn Buchanan"
+        }
+    ],
+    "greeting": "Hello, Bentley Underwood! You have 7 unread messages.",
+    "favoriteFruit": "strawberry"
 }
