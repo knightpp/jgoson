@@ -55,13 +55,14 @@ func main() {
 }
 
 type Type struct {
-	Name   string
-	Fields []Field
+	Name    string  `json:"name,omitempty"`
+	Fields  []Field `json:"fields,omitempty"`
+	IsSlice bool    `json:"is_slice,omitempty"`
 }
 
 type Field struct {
-	Name string
-	Type *Type
+	Name string `json:"name,omitempty"`
+	Type *Type  `json:"type,omitempty"`
 }
 
 func (t *Type) IsStruct() bool {
@@ -90,6 +91,10 @@ func (t *Type) toGoInline(w io.Writer) {
 
 func (t Field) toGoInline(w io.Writer) {
 	fmt.Fprint(w, t.Name, " ")
+
+	if t.Type.IsSlice {
+		fmt.Fprint(w, "[]")
+	}
 
 	if t.Type.IsStruct() {
 		fmt.Fprintln(w, "struct{")
@@ -121,11 +126,14 @@ func recursionInner(value any, parentName string, depth int) *Type {
 		return t
 	} else if s, ok := value.([]any); ok {
 		if len(s) > 0 {
-			t := recursionInner(s[0], parentName, depth+1)
+			newT := recursionInner(s[0], parentName, depth+1)
+			newT.IsSlice = true
+
 			t.Fields = append(t.Fields, Field{
 				Name: parentName,
-				Type: t,
+				Type: newT,
 			})
+
 			return t
 		}
 		return t
