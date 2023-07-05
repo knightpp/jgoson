@@ -85,7 +85,6 @@ func (t *Type) toGoInline(w io.Writer) {
 
 	for _, field := range t.Fields {
 		field.toGoInline(w)
-		fmt.Fprintln(w)
 	}
 }
 
@@ -104,6 +103,7 @@ func (t Field) toGoInline(w io.Writer) {
 	}
 
 	t.Type.toGoInline(w)
+	fmt.Fprintln(w)
 }
 
 func recursion(value any) *Type {
