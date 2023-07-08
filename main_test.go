@@ -49,11 +49,12 @@ func TestRecursion(t *testing.T) {
 	})
 
 	t.Run("slice", func(t *testing.T) {
-		res := recursion([]any{"string"})
+		res := recursion(map[string]any{"tags": []any{"string"}})
 
 		assert.Equal(t, "Generated", res.Name)
 		assert.Len(t, res.Fields, 1)
-		assert.Equal(t, "Generated", res.Fields[0].Name)
+		assert.Equal(t, "tags", res.Fields[0].Name)
 		assert.Equal(t, "string", res.Fields[0].Type.Name)
+		assert.Equal(t, true, res.Fields[0].Type.IsSlice)
 	})
 }

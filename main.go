@@ -128,13 +128,7 @@ func recursionInner(value any, parentName string, depth int) *Type {
 		if len(s) > 0 {
 			newT := recursionInner(s[0], parentName, depth+1)
 			newT.IsSlice = true
-
-			t.Fields = append(t.Fields, Field{
-				Name: parentName,
-				Type: newT,
-			})
-
-			return t
+			return newT
 		}
 		return t
 	} else {
