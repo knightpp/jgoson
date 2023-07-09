@@ -16,7 +16,7 @@ import (
 var testData []byte
 
 func main() {
-	var v any
+	var v map[string]any
 	err := json.Unmarshal(testData, &v)
 	if err != nil {
 		log.Fatal(err)
@@ -38,20 +38,6 @@ func main() {
 	}
 
 	fmt.Println(string(src))
-
-	// buf := bytes.Buffer{}
-	// printStruct(&buf, Type{
-	// 	Name:  "Generated",
-	// 	Types: structs,
-	// })
-
-	// src, err := format.Source(buf.Bytes())
-	// if err != nil {
-	// 	fmt.Println(buf.String())
-	// 	log.Fatal(err)
-	// }
-
-	// fmt.Println(string(src))
 }
 
 type Type struct {
@@ -106,7 +92,7 @@ func (t Field) toGoInline(w io.Writer) {
 	fmt.Fprintln(w)
 }
 
-func recursion(value any) *Type {
+func recursion(value map[string]any) *Type {
 	return recursionInner(value, "Generated", 0)
 }
 
@@ -125,6 +111,7 @@ func recursionInner(value any, parentName string, depth int) *Type {
 		}
 		return t
 	} else if s, ok := value.([]any); ok {
+		// TODO: return []any if slice is empty
 		if len(s) > 0 {
 			newT := recursionInner(s[0], parentName, depth+1)
 			newT.IsSlice = true

@@ -7,13 +7,6 @@ import (
 )
 
 func TestRecursion(t *testing.T) {
-	t.Run("one field", func(t *testing.T) {
-		res := recursion("")
-
-		assert.Equal(t, "string", res.Name)
-		assert.Nil(t, res.Fields)
-	})
-
 	t.Run("map with field", func(t *testing.T) {
 		res := recursion(map[string]any{
 			"struct_name": 10,
