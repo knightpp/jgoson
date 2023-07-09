@@ -5,7 +5,7 @@
     "isActive": false,
     "balance": "$3,976.54",
     "age": 33,
-    "eyeColor": "blue",
+    "eye_color": "blue",
     "latitude": 20.236903,
     "longitude": 4.215941,
     "tags": [

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"strings"
 )
 
 type Type struct {
@@ -21,27 +22,30 @@ func (t *Type) IsStruct() bool {
 	return len(t.Fields) != 0
 }
 
-func (t *Type) ToGoInline(w io.Writer) {
-	fmt.Fprintln(w, "type", t.Name, "struct {")
-	for _, field := range t.Fields {
-		field.toGoInline(w)
-	}
+func (t *Type) ToGoInline(w io.Writer, cfg Config) {
+	cfg.FillDefaults()
+
+	fmt.Fprintln(w, "type", cfg.StructNameFn(t.Name), "struct {")
+	t.toGoInline(w, &cfg)
 	fmt.Fprintln(w, "}")
 }
 
-func (t *Type) toGoInline(w io.Writer) {
+func (t *Type) toGoInline(w io.Writer, cfg *Config) {
 	if !t.IsStruct() {
 		fmt.Fprint(w, t.Name)
 		return
 	}
 
 	for _, field := range t.Fields {
-		field.toGoInline(w)
+		field.toGoInline(w, cfg)
+		tagValue := strings.Join(append([]string{cfg.TagNameFn(field.Name)}, cfg.TagOpts...), ",")
+		fmt.Fprintf(w, " `%s:\"%s\"`", cfg.Tag, tagValue)
+		fmt.Fprintln(w)
 	}
 }
 
-func (t Field) toGoInline(w io.Writer) {
-	fmt.Fprint(w, t.Name, " ")
+func (t Field) toGoInline(w io.Writer, cfg *Config) {
+	fmt.Fprint(w, cfg.StructFieldFn(t.Name), " ")
 
 	if t.Type.IsSlice {
 		fmt.Fprint(w, "[]")
@@ -49,13 +53,11 @@ func (t Field) toGoInline(w io.Writer) {
 
 	if t.Type.IsStruct() {
 		fmt.Fprintln(w, "struct{")
-		t.Type.toGoInline(w)
-		fmt.Fprintln(w, "}")
-		return
+		t.Type.toGoInline(w, cfg)
+		fmt.Fprint(w, "}")
+	} else {
+		t.Type.toGoInline(w, cfg)
 	}
-
-	t.Type.toGoInline(w)
-	fmt.Fprintln(w)
 }
 
 func Parse(value map[string]any) *Type {
