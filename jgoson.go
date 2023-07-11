@@ -1,6 +1,7 @@
 package jgoson
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"reflect"
@@ -9,6 +10,17 @@ import (
 
 func Parse(value map[string]any) *Type {
 	return parseRecursive(value, "Generated", 0)
+}
+
+func ParseJSON(r io.Reader) (*Type, error) {
+	var m map[string]any
+
+	err := json.NewDecoder(r).Decode(&m)
+	if err != nil {
+		return nil, err
+	}
+
+	return Parse(m), nil
 }
 
 // Type represents a type in Go.
