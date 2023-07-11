@@ -1,4 +1,4 @@
-module github.com/knightpp/oleksii-brainfuck
+module github.com/knightpp/jgoson
 
 go 1.20
 

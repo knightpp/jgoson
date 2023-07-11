@@ -3,7 +3,7 @@ package jgoson_test
 import (
 	"testing"
 
-	"github.com/knightpp/oleksii-brainfuck/jgoson"
+	"github.com/knightpp/jgoson"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -9,7 +9,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/knightpp/oleksii-brainfuck/jgoson"
+	"github.com/knightpp/jgoson"
 )
 
 //go:embed testdata.json
