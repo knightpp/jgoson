@@ -1,9 +1,9 @@
 package jgoson_test
 
 import (
-	"oleksii-brainfuck/jgoson"
 	"testing"
 
+	"github.com/knightpp/oleksii-brainfuck/jgoson"
 	"github.com/stretchr/testify/assert"
 )
 

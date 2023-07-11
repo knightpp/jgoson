@@ -7,8 +7,9 @@ import (
 	"fmt"
 	"go/format"
 	"log"
-	"oleksii-brainfuck/jgoson"
 	"os"
+
+	"github.com/knightpp/oleksii-brainfuck/jgoson"
 )
 
 //go:embed testdata.json

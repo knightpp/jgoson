@@ -1,4 +1,4 @@
-module oleksii-brainfuck
+module github.com/knightpp/oleksii-brainfuck
 
 go 1.20
 
