@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"reflect"
 	"strings"
 )
 
@@ -121,36 +120,4 @@ func (f Field) toGo(w io.Writer, cfg *Config) (types []*Type) {
 	}
 
 	return types
-}
-
-func parseRecursive(value any, parentName string, depth int) *Type {
-	if m, ok := value.(map[string]any); ok {
-		t := &Type{
-			Name:   parentName,
-			Fields: nil,
-		}
-		for k, v := range m {
-			t.Fields = append(t.Fields, Field{
-				Name: k,
-				Type: parseRecursive(v, k, depth+1),
-			})
-		}
-		return t
-	} else if s, ok := value.([]any); ok {
-		if len(s) == 0 {
-			return &Type{
-				Name:    "any",
-				IsSlice: true,
-			}
-
-		}
-
-		newT := parseRecursive(s[0], parentName, depth+1)
-		newT.IsSlice = true
-		return newT
-	} else {
-		return &Type{
-			Name: reflect.TypeOf(value).String(),
-		}
-	}
 }
