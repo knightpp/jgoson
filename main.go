@@ -29,7 +29,7 @@ func main() {
 	enc.Encode(t)
 
 	buf := bytes.Buffer{}
-	t.ToGoInline(&buf, jgoson.Config{})
+	t.ToGo(&buf, jgoson.Config{})
 
 	src, err := format.Source(buf.Bytes())
 	if err != nil {
