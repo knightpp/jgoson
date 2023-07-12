@@ -3,39 +3,64 @@ package main
 import (
 	"bytes"
 	_ "embed"
-	"encoding/json"
+	"flag"
 	"fmt"
 	"go/format"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/knightpp/jgoson"
 )
 
-//go:embed testdata.json
-var testData []byte
+var (
+	useInline bool
+	tag       string
+	tagOpts   string
+)
+
+func init() {
+	flag.BoolVar(&useInline, "inline", true, "inline structs")
+	flag.StringVar(&tag, "tag", "json", "tag to use")
+	flag.StringVar(&tagOpts, "tag-opts", "omitempty", "tag additional option, comma separated")
+}
 
 func main() {
-	var v map[string]any
-	err := json.Unmarshal(testData, &v)
-	if err != nil {
+	flag.Parse()
+
+	if err := run(); err != nil {
 		log.Fatal(err)
 	}
+}
 
-	t := jgoson.Parse(v)
-
-	enc := json.NewEncoder(os.Stdout)
-	enc.SetIndent("", "  ")
-	enc.Encode(t)
+func run() error {
+	t, err := jgoson.ParseJSON(os.Stdin)
+	if err != nil {
+		return fmt.Errorf("parse json: %w", err)
+	}
 
 	buf := bytes.Buffer{}
-	t.ToGo(&buf, jgoson.Config{})
+
+	opts := make([]string, 0)
+	if tagOpts != "" {
+		opts = strings.Split(tagOpts, ",")
+	}
+
+	fn := t.ToGo
+	if useInline {
+		fn = t.ToGoInline
+	}
+	fn(&buf, jgoson.Config{
+		Tag:     tag,
+		TagOpts: opts,
+	})
 
 	src, err := format.Source(buf.Bytes())
 	if err != nil {
-		fmt.Println(buf.String())
-		log.Fatal(err)
+		return fmt.Errorf("format source: %w", err)
 	}
 
 	fmt.Println(string(src))
+
+	return nil
 }
