@@ -188,6 +188,24 @@ func TestParse(t *testing.T) {
 				IsSlice: false,
 			},
 		},
+		{
+			name: "EmptySlice",
+			input: map[string]any{
+				"emptySlice": []any{},
+			},
+			expected: &jgoson.Type{
+				Name: "Generated",
+				Fields: []jgoson.Field{
+					{
+						Name: "emptySlice",
+						Type: &jgoson.Type{
+							Name:    "any",
+							IsSlice: true,
+						},
+					},
+				},
+			},
+		},
 	}
 
 	for _, tc := range testCases {
@@ -380,6 +398,8 @@ func TestType_ToGo(t *testing.T) {
 			name:           "nil fields",
 			typ:            jgoson.Type{Name: "Generated"},
 			expectedOutput: "type Generated struct {\n}\n",
+			tagName:        "tag",
+			tagOpts:        []string{},
 		},
 		{
 			name: "two simple structs",
@@ -409,6 +429,108 @@ func TestType_ToGo(t *testing.T) {
 			tagName: "tag",
 			tagOpts: []string{},
 		},
+		{
+			name: "nested structs with tag options",
+			typ: jgoson.Type{
+				Name: "Main",
+				Fields: []jgoson.Field{
+					{
+						Name: "field1",
+						Type: &jgoson.Type{
+							Name: "Sub1",
+							Fields: []jgoson.Field{
+								{
+									Name: "subField1",
+									Type: &jgoson.Type{Name: "int"},
+								},
+							},
+						},
+					},
+					{
+						Name: "field2",
+						Type: &jgoson.Type{
+							Name: "Sub2",
+							Fields: []jgoson.Field{
+								{
+									Name: "subField2",
+									Type: &jgoson.Type{Name: "string"},
+								},
+							},
+						},
+					},
+				},
+			},
+			expectedOutput: "type Main struct {\n\tField1 Sub1 `tag:\"field1\"`\n\tField2 Sub2 `tag:\"field2\"`\n}\n\n" +
+				"type Sub1 struct {\n\tSubField1 int `tag:\"sub_field1\"`\n}\n\n" +
+				"type Sub2 struct {\n\tSubField2 string `tag:\"sub_field2\"`}\n\n",
+			tagName: "tag",
+			tagOpts: []string{},
+		},
+		{
+			name: "nested structs with tag options",
+			typ: jgoson.Type{
+				Name: "Main",
+				Fields: []jgoson.Field{
+					{
+						Name: "field1",
+						Type: &jgoson.Type{
+							Name: "Sub1",
+							Fields: []jgoson.Field{
+								{
+									Name: "subField1",
+									Type: &jgoson.Type{Name: "int"},
+								},
+							},
+						},
+					},
+					{
+						Name: "field2",
+						Type: &jgoson.Type{
+							Name: "Sub2",
+							Fields: []jgoson.Field{
+								{
+									Name: "subField2",
+									Type: &jgoson.Type{Name: "string"},
+								},
+							},
+						},
+					},
+				},
+			},
+			expectedOutput: "type Main struct {\n\tField1 Sub1 `tag:\"field1\"`\n\tField2 Sub2 `tag:\"field2\"`\n}\n\n" +
+				"type Sub1 struct {\n\tSubField1 int `tag:\"sub_field1\"`\n}\n\n" +
+				"type Sub2 struct {\n\tSubField2 string `tag:\"sub_field2\"`\n}\n\n",
+			tagName: "tag",
+			tagOpts: []string{},
+		},
+		{
+			name: "struct with slice field",
+			typ: jgoson.Type{
+				Name: "Main",
+				Fields: []jgoson.Field{
+					{
+						Name: "field1",
+						Type: &jgoson.Type{Name: "[]int"},
+					},
+					{
+						Name: "field2",
+						Type: &jgoson.Type{
+							Name: "Sub",
+							Fields: []jgoson.Field{
+								{
+									Name: "subField",
+									Type: &jgoson.Type{Name: "string"},
+								},
+							},
+						},
+					},
+				},
+			},
+			expectedOutput: "type Main struct {\n\tField1 []int `tag:\"field1\"`\n\tField2 Sub `tag:\"field2\"`\n}\n\n" +
+				"type Sub struct {\n\tSubField string `tag:\"sub_field\"`\n}\n\n",
+			tagName: "tag",
+			tagOpts: []string{},
+		},
 	}
 
 	for _, tc := range testCases {
@@ -422,7 +544,11 @@ func TestType_ToGo(t *testing.T) {
 
 			result, err := format.Source(buf.Bytes())
 			assert.NoError(t, err)
-			assert.Equal(t, tc.expectedOutput, string(result))
+
+			expected, err := format.Source([]byte(tc.expectedOutput))
+			assert.NoError(t, err)
+
+			assert.Equal(t, string(expected), string(result))
 		})
 	}
 }
