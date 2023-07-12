@@ -23,7 +23,8 @@ func (c *Config) FillDefaults() {
 		c.TagNameFn = LowerCamelCaseToSnakeCase
 	}
 
-	if len(c.TagOpts) == 0 {
+	// check for nil to differentiate between empty and nil
+	if c.TagOpts == nil {
 		c.TagOpts = []string{"omitempty"}
 	}
 

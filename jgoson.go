@@ -44,7 +44,9 @@ func (t *Type) ToGoInline(w io.Writer, cfg Config) {
 	cfg.FillDefaults()
 
 	fmt.Fprintln(w, "type", cfg.StructNameFn(t.Name), "struct {")
-	t.toGoInline(w, &cfg)
+	if t.IsStruct() {
+		t.toGoInline(w, &cfg)
+	}
 	fmt.Fprintln(w, "}")
 }
 
