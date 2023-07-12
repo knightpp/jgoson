@@ -84,6 +84,10 @@ func (t Field) toGoInline(w io.Writer, cfg *Config) {
 func (t *Type) ToGo(w io.Writer, cfg Config) {
 	cfg.FillDefaults()
 
+	if !t.IsStruct() {
+		fmt.Fprintln(w, "type", cfg.StructNameFn(t.Name), "struct{\n}")
+		return
+	}
 	t.toGo(w, &cfg)
 }
 
