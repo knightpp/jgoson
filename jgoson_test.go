@@ -368,6 +368,37 @@ func TestType_ToGoInline(t *testing.T) {
 			tagName:        "json",
 			tagOpts:        []string{"omitempty"},
 		},
+		{
+			name: "slice",
+			typ: jgoson.Type{
+				Name: "Main",
+				Fields: []jgoson.Field{
+					{
+						Name: "field1",
+						Type: &jgoson.Type{Name: "int", IsSlice: true},
+					},
+					{
+						Name: "field2",
+						Type: &jgoson.Type{
+							Name: "Sub",
+							Fields: []jgoson.Field{
+								{
+									Name: "subField1",
+									Type: &jgoson.Type{Name: "string"},
+								},
+								{
+									Name: "subField2",
+									Type: &jgoson.Type{Name: "bool"},
+								},
+							},
+						},
+					},
+				},
+			},
+			tagName:        "tage",
+			tagOpts:        []string{"omit"},
+			expectedOutput: "type Main struct {\n\tField1 []int `tage:\"field1,omit\"`\n\tField2 struct {\n\t\tSubField1 string `tage:\"sub_field1,omit\"`\n\t\tSubField2 bool   `tage:\"sub_field2,omit\"`\n\t} `tage:\"field2,omit\"`\n}\n",
+		},
 	}
 
 	for _, tc := range testCases {
@@ -530,6 +561,21 @@ func TestType_ToGo(t *testing.T) {
 				"type Sub struct {\n\tSubField string `tag:\"sub_field\"`\n}\n\n",
 			tagName: "tag",
 			tagOpts: []string{},
+		},
+		{
+			name: "slice",
+			typ: jgoson.Type{
+				Name: "Main",
+				Fields: []jgoson.Field{
+					{
+						Name: "field1",
+						Type: &jgoson.Type{Name: "string", IsSlice: true},
+					},
+				},
+			},
+			tagName:        "-",
+			tagOpts:        []string{},
+			expectedOutput: "type Main struct {\n\tField1 []string `-:\"field1\"`\n}\n\n",
 		},
 	}
 
