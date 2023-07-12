@@ -3,7 +3,6 @@ package jgoson_test
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"go/format"
 	"strings"
 	"testing"
@@ -268,18 +267,18 @@ func TestParseJSON(t *testing.T) {
 
 func TestType_ToGoInline(t *testing.T) {
 	testCases := []struct {
-		name            string
-		typ             jgoson.Type
-		expectedOutput  string
-		expectedTagName string
-		tagOpts         []string
+		name           string
+		typ            jgoson.Type
+		expectedOutput string
+		tagName        string
+		tagOpts        []string
 	}{
 		{
-			name:            "nil fields",
-			typ:             jgoson.Type{Name: "Generated"},
-			expectedOutput:  "type Generated struct {\n}\n",
-			expectedTagName: "tag",
-			tagOpts:         []string{},
+			name:           "nil fields",
+			typ:            jgoson.Type{Name: "Generated"},
+			expectedOutput: "type Generated struct {\n}\n",
+			tagName:        "tag",
+			tagOpts:        []string{},
 		},
 		{
 			name: "dictionary",
@@ -300,9 +299,9 @@ func TestType_ToGoInline(t *testing.T) {
 					},
 				},
 			},
-			expectedOutput:  "type Main struct {\n\tField1 int     `json:\"field1\"`\n\tField2 float64 `json:\"field2\"`\n\tField3 bool    `json:\"field3\"`\n}\n",
-			expectedTagName: "json",
-			tagOpts:         []string{},
+			expectedOutput: "type Main struct {\n\tField1 int     `json:\"field1\"`\n\tField2 float64 `json:\"field2\"`\n\tField3 bool    `json:\"field3\"`\n}\n",
+			tagName:        "json",
+			tagOpts:        []string{},
 		},
 		{
 			name: "nested struct",
@@ -328,9 +327,9 @@ func TestType_ToGoInline(t *testing.T) {
 					},
 				},
 			},
-			expectedOutput:  "type Main struct {\n\tField1 struct {\n\t\tSubField1 int    `json:\"sub_field1\"`\n\t\tSubField2 string `json:\"sub_field2\"`\n\t} `json:\"field1\"`\n}\n",
-			expectedTagName: "json",
-			tagOpts:         []string{},
+			expectedOutput: "type Main struct {\n\tField1 struct {\n\t\tSubField1 int    `json:\"sub_field1\"`\n\t\tSubField2 string `json:\"sub_field2\"`\n\t} `json:\"field1\"`\n}\n",
+			tagName:        "json",
+			tagOpts:        []string{},
 		},
 		{
 			name: "tag options",
@@ -347,9 +346,9 @@ func TestType_ToGoInline(t *testing.T) {
 					},
 				},
 			},
-			expectedOutput:  "type Main struct {\n\tField1 int     `json:\"field1,omitempty\"`\n\tField2 float64 `json:\"field2,omitempty\"`\n}\n",
-			expectedTagName: "json",
-			tagOpts:         []string{"omitempty"},
+			expectedOutput: "type Main struct {\n\tField1 int     `json:\"field1,omitempty\"`\n\tField2 float64 `json:\"field2,omitempty\"`\n}\n",
+			tagName:        "json",
+			tagOpts:        []string{"omitempty"},
 		},
 	}
 
@@ -357,7 +356,7 @@ func TestType_ToGoInline(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			var buf bytes.Buffer
 			cfg := jgoson.Config{
-				Tag:     tc.expectedTagName,
+				Tag:     tc.tagName,
 				TagOpts: tc.tagOpts,
 			}
 			tc.typ.ToGoInline(&buf, cfg)
@@ -374,89 +373,56 @@ func TestType_ToGo(t *testing.T) {
 		name           string
 		typ            jgoson.Type
 		expectedOutput string
-		expectedTag    string
+		tagName        string
+		tagOpts        []string
 	}{
 		{
-			name: "Empty Type",
-			typ: jgoson.Type{
-				Name:    "Generated",
-				Fields:  nil,
-				IsSlice: false,
-			},
+			name:           "nil fields",
+			typ:            jgoson.Type{Name: "Generated"},
 			expectedOutput: "type Generated struct {\n}\n",
-			expectedTag:    "json",
 		},
 		{
-			name: "Struct Type",
+			name: "two simple structs",
 			typ: jgoson.Type{
-				Name: "Generated",
+				Name: "first",
 				Fields: []jgoson.Field{
 					{
-						Name: "Field1",
-						Type: &jgoson.Type{
-							Name:    "Type1",
-							Fields:  nil,
-							IsSlice: false,
-						},
+						Name: "field1",
+						Type: &jgoson.Type{Name: "int"},
 					},
 					{
-						Name: "Field2",
+						Name: "field2",
 						Type: &jgoson.Type{
-							Name: "Type2",
+							Name: "second",
 							Fields: []jgoson.Field{
 								{
-									Name: "NestedField",
-									Type: &jgoson.Type{
-										Name:    "NestedType",
-										Fields:  nil,
-										IsSlice: false,
-									},
+									Name: "fieldA",
+									Type: &jgoson.Type{Name: "[]int"},
 								},
 							},
-							IsSlice: false,
 						},
 					},
 				},
-				IsSlice: false,
 			},
-			expectedOutput: "type Generated struct {\n\tField1 Type1 `json:\"field1\"`\n\tField2 Type2 `json:\"field2\"`\n}\n\n" +
-				"type Type1 struct {\n}\n\n" +
-				"type Type2 struct {\n\tNestedField NestedType `json:\"nested_field\"`\n}\n\n" +
-				"type NestedType struct {\n}\n",
-			expectedTag: "json",
-		},
-		{
-			name: "Slice Type",
-			typ: jgoson.Type{
-				Name: "Generated",
-				Fields: []jgoson.Field{
-					{
-						Name: "Field",
-						Type: &jgoson.Type{
-							Name:    "SliceType",
-							Fields:  nil,
-							IsSlice: false,
-						},
-					},
-				},
-				IsSlice: true,
-			},
-			expectedOutput: "type Generated struct {\n\tField []SliceType `json:\"field\"`\n}\n\n" +
-				"type SliceType struct {\n}\n",
-			expectedTag: "json",
+			expectedOutput: "type First struct {\n\tField1 int    `tag:\"field1\"`\n\tField2 Second `tag:\"field2\"`\n}\n\n" +
+				"type Second struct {\n\tFieldA []int `tag:\"field_a\"`\n}\n\n",
+			tagName: "tag",
+			tagOpts: []string{},
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			var buf bytes.Buffer
-			cfg := jgoson.Config{}
+			cfg := jgoson.Config{
+				Tag:     tc.tagName,
+				TagOpts: tc.tagOpts,
+			}
 			tc.typ.ToGo(&buf, cfg)
 
-			result := buf.String()
-			assert.Equal(t, tc.expectedOutput, result)
-
-			assert.Contains(t, result, fmt.Sprintf("`%s", tc.expectedTag))
+			result, err := format.Source(buf.Bytes())
+			assert.NoError(t, err)
+			assert.Equal(t, tc.expectedOutput, string(result))
 		})
 	}
 }
