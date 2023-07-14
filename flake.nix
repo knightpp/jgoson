@@ -38,15 +38,14 @@
               src = pkgs.nix-gitignore.gitignoreSource [ ] ./.;
               # vendorSha256 = pkgs.lib.fakeSha256; # uncomment to get error with real sha256
               vendorSha256 = "sha256-gJ2gcscEIFaeRztTR1kCC8N8uiNmbo5pZDoAyQoFz7c=";
-            };
-        });
 
-      meta = forAllSystems
-        ({ pkgs }: with pkgs.lib; {
-          description = "Generate Go structs from JSON";
-          homepage = "https://github.com/knightpp/jgoson";
-          license = licenses.mit;
-          maintainers = with maintainers; [ knightpp ];
+              meta = with pkgs.lib; {
+                description = "Generate Go structs from JSON";
+                homepage = "https://github.com/knightpp/jgoson";
+                license = licenses.mit;
+                maintainers = with maintainers; [ knightpp ];
+              };
+            };
         });
     };
 }
