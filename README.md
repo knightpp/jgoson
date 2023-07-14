@@ -9,6 +9,12 @@ separate structs.
 go install github.com/knightpp/jgoson/cmd/jgoson@latest
 ```
 
+or with Nix flakes
+
+```bash
+nix profile install github:knightpp/jgoson
+```
+
 ## How to use
 
 ```bash
